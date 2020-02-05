@@ -1,11 +1,15 @@
 let cors = require("cors");
 let express = require("express");
 let app = express();
-let bodyParser = require("body-parser");
+let multer = require("multer");
+let upload = multer({ dest: __dirname + "/uploads/" });
 let MongoClient = require("mongodb").MongoClient;
 let ObjectID = require("mongodb").ObjectID;
+app.use("/", express.static("build"));
+// // app.use("/uploads", express.static("uploads"));
 app.use("/public", express.static("public"));
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+
 let dbo = undefined;
 let url =
   "mongodb+srv://bob:bobsue@clusteramanda-kqoqy.mongodb.net/test?retryWrites=true&w=majority";
@@ -13,11 +17,14 @@ MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
   dbo = db.db("dev-test");
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", upload.none(), (req, res) => {
+  console.log("login endpoint hit");
+  console.log("req.body:", req.body);
   let username = req.body.username;
   let password = req.body.password;
   dbo.collection("users").findOne({ username: username }, (error, user) => {
     if (error) {
+      console.log("/login error", error);
       res.send(JSON.stringify({ success: false, error }));
       return;
     }
@@ -33,10 +40,11 @@ app.post("/login", (req, res) => {
       res.send(JSON.stringify({ success: true }));
     }
   });
-  res.send(JSON.stringify({ success: false, error }));
 });
 
-app.post("/add-key", (req, res) => {
+app.post("/add-key", upload.none(), (req, res) => {
+  console.log("add-key endpoint hit");
+  console.log("req.body:", req.body);
   let username = req.body.username;
   let key = req.body.key;
   dbo
@@ -53,7 +61,9 @@ app.post("/add-key", (req, res) => {
     );
 });
 
-app.post("/verify-key", (req, res) => {
+app.post("/verify-key", upload.none(), (req, res) => {
+  console.log("verify-key endpoint hit");
+  console.log("req.body:", req.body);
   let key = req.body.key;
   dbo.collection("users").findOne({ key: key }, (error, user) => {
     if (error) {
@@ -73,15 +83,16 @@ app.post("/verify-key", (req, res) => {
       res.send(JSON.stringify({ success: true }));
     }
   });
-  res.send(JSON.stringify({ success: false, error }));
 });
 
-app.get("/servers", (req, res) => {
+app.get("/servers", upload.none(), (req, res) => {
+  console.log("/servers endpoint hit");
   dbo
     .collection("test-servers")
     .find({})
     .toArray((error, servers) => {
       if (error) {
+        console.log("error", error);
         res.send(JSON.stringify({ success: false }));
         return;
       }
@@ -89,7 +100,8 @@ app.get("/servers", (req, res) => {
     });
 });
 
-app.post("/delete-server", (req, res) => {
+app.post("/delete-server", upload.none(), (req, res) => {
+  console.log("/delete-servers endpoint hit");
   let serverId = req.body.serverId;
   dbo
     .collection("test-servers")
@@ -105,7 +117,8 @@ app.post("/delete-server", (req, res) => {
     );
 });
 
-app.post("/add-server", (req, res) => {
+app.post("/add-server", upload.none(), (req, res) => {
+  console.log("/add-server endpoint hit");
   let newId = req.body.newId;
   dbo
     .collection("test-servers")
@@ -121,6 +134,11 @@ app.post("/add-server", (req, res) => {
         })
       )
     );
+});
+
+app.all("/*", (req, res, next) => {
+  // needed for react router
+  res.sendFile(__dirname + "/public/index.html");
 });
 
 app.listen(4000, "0.0.0.0", () => {

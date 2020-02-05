@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+// import { Link, Redirect, withRouter } from "react-router-dom";
 
 class UnconnectedSecuredHomepage extends Component {
   constructor(props) {
@@ -9,6 +10,15 @@ class UnconnectedSecuredHomepage extends Component {
       servers: []
     };
   }
+
+  // componentDidMount = () => {
+  //   if (this.props.loggedIn) {
+  //     history.pushState(null, null, location.href);
+  //     window.onpopstate = function(event) {
+  //       history.go(1);
+  //     };
+  //   }
+  // };
 
   verifyKey = async () => {
     let data = new FormData();
@@ -82,7 +92,7 @@ class UnconnectedSecuredHomepage extends Component {
     if (this.props.loggedIn && this.state.access) {
       return (
         <div>
-          <div>Secret Server Inventory:</div>
+          <div>Server Inventory:</div>
           <br></br>
           <button onClick={this.addServer}>Add new server</button>
           {this.state.servers.map(server => {

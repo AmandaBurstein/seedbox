@@ -21,19 +21,23 @@ class UnconnectedLogin extends Component {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     this.setState({ securityKey: result });
+    console.log("this.state.securityKey:", this.state.securityKey);
     return;
   };
 
   handleUsernameChange = event => {
+    console.log("new username", event.target.value);
     this.setState({ username: event.target.value });
   };
 
   handlePasswordChange = event => {
+    console.log("new password", event.target.value);
     this.setState({ password: event.target.value });
   };
 
   handleSubmit = async event => {
     event.preventDefault();
+    console.log("login form submitted");
     let data = new FormData();
     data.append("username", this.state.username);
     data.append("password", this.state.password);
@@ -63,13 +67,15 @@ class UnconnectedLogin extends Component {
         body: newData
       });
       let keyResponse = await newResponse.text();
-      JSON.parse(keyResponse);
+      let newBody = JSON.parse(keyResponse);
+      console.log(newBody.success);
       this.props.history.push("/secured-homepage");
+      console.log("this.props.securityKey:", this.props.securityKey);
     }
     return;
   };
 
-  render() {
+  render = () => {
     return (
       <div>
         <h1>Login </h1>
@@ -83,7 +89,7 @@ class UnconnectedLogin extends Component {
         </form>
       </div>
     );
-  }
+  };
 }
 
 let mapStateToProps = state => {
